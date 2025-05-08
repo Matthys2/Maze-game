@@ -14,4 +14,3 @@ Things I want to add to the game are:
 - Better generating code: generate even bigger mazes
 - More options
 - Download maze button
-- 
