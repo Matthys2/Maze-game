@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Maze V2</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div>
+  <button class="open-menu-button" onclick="toggleMenu()">Settings</button>
+  <div id="slidingMenu" class="sliding-menu-container">
+    <button class="close-button" onclick="toggleMenu()">&times;</button>
+    <div class="menu-title">Options</div>
+    <div class="menu-item">Beta Features</div>
+      <div class="menu-item">
+      <label>
+        <input id="BetterGen" type="checkbox" name="BetterGen" value="yes"> Better Generation (Slower)(doesn't work yet)
+      </label>
+    </div>
+  </div>
+</div>
+    <div id="sizeInputs">
+        <input type="number" id="mazeWidthInput" placeholder="Width (odd, max 100001)">
+        <input type="number" id="mazeHeightInput" placeholder="Height (odd, max 100001)">
+        <button id="generateButton">Generate Maze</button>
+    </div>
+    <canvas id="mazeCanvas"></canvas>
+    <p id="message"></p>
+    <div>
+        <button id="zoom-in">Zoom In</button>
+        <button id="zoom-out">Zoom Out</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
