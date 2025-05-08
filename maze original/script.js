@@ -4,13 +4,9 @@ let cellSize = 50; // Initial cell size
 const minCellSize = 10; // Set a reasonable minimum cell size
 
 // Prompt for maze dimensions
-do {
-    mazeWidth = parseInt(prompt("Enter the width of the maze (reccomended under 224, odd numbers preferred):"), 10);
-} while (isNaN(mazeWidth) || mazeHeight % 2 === 0);
 
-do {
-    mazeHeight = parseInt(prompt("Enter the height of the maze (reccomended maximum 79, odd numbers preferred):"), 10);
-} while (isNaN(mazeHeight) || mazeHeight % 2 === 0);
+mazeWidth = parseInt(prompt("Enter the width of the maze (reccomended under 224, odd numbers preferred):"), 10);
+mazeHeight = parseInt(prompt("Enter the height of the maze (reccomended maximum 79, odd numbers preferred):"), 10);
 
 // Initialize the maze layout
 const mazeLayout = Array.from({ length: mazeHeight }, () => Array(mazeWidth).fill('#'));
