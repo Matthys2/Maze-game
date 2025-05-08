@@ -5,18 +5,22 @@
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <div>
-  <button class="open-menu-button" onclick="toggleMenu()">Settings</button>
-  <div id="slidingMenu" class="sliding-menu-container">
-    <button class="close-button" onclick="toggleMenu()">&times;</button>
-    <div class="menu-title">Options</div>
-    <div class="menu-item">Beta Features</div>
+<body id="body">
+  <div>
+    <button class="open-menu-button" onclick="toggleMenu()">Settings</button>
+    <div id="slidingMenu" class="sliding-menu-container">
+      <button class="close-button" onclick="toggleMenu()">&times;</button>
+      <div class="menu-title">Options</div>
       <div class="menu-item">
       <label>
-        <input id="BetterGenBeta" type="checkbox"> Better Generation
+        <input id="ShowPath" type="checkbox"> Show the boxes you have visited
       </label>
-    </div>
+      </div>
+      <div class="menu-item">
+        <label>
+          <input id="seeAll" type="checkbox" onclick="toggleView()"> See all cells (for big mazes)
+        </label>
+      </div>
   </div>
 </div>
     <div id="sizeInputs">

@@ -18,33 +18,7 @@ function toggleMenu() {
       menu.classList.toggle("show");
     }
 
-function generateMaze(x, y) {
-    try {
-        const directions = [
-            { dx: 0, dy: -1 },
-            { dx: -1, dy: 0 },
-            { dx: 0, dy: 1 },
-            { dx: 1, dy: 0 }
-        ];
-
-        directions.sort(() => Math.random() - 0.5);
-        mazeLayout[x][y] = ' ';
-
-        for (const { dx, dy } of directions) {
-            const nx = x + dx * 2;
-            const ny = y + dy * 2;
-
-            if (nx >= 0 && nx < mazeHeight && ny >= 0 && ny < mazeWidth && mazeLayout[nx][ny] === '#') {
-                mazeLayout[x + dx][y + dy] = ' ';
-                generateMaze(nx, ny);
-            }
-        }
-    } catch(e) {
-        console.log(e)
-    }
-}
-
-function generateMazeBeta(startX, startY) {
+function generateMaze(startX, startY) {
     const directions = [
         { dx: 0, dy: -1 },
         { dx: -1, dy: 0 },
@@ -111,7 +85,7 @@ function drawMaze() {
     updatePlayer()
 }
 
-function updatePlayer(dx = 0, dy = 0, x = "NaN", y = "NaN") {
+function updatePlayer(dx = 0, dy = 0) {
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -127,7 +101,9 @@ function updatePlayer(dx = 0, dy = 0, x = "NaN", y = "NaN") {
     } else if (mazeLayout[playerPos.x][playerPos.y] === '#') {
         lastCellColor = 'black'
     } else {
-        lastCellColor = 'white';
+        if (document.getElementById("ShowPath").checked) {
+            lastCellColor = 'grey'
+        } else {lastCellColor = 'white'}
     }
 
     // Draw the player
@@ -153,11 +129,21 @@ function movePlayer(dx, dy) {
             playerPos.y = newY;
             updatePlayer(dx, dy, newX, newY); // Update the player's position
             if (playerPos.x === exitPos.x && playerPos.y === exitPos.y) {
-                document.getElementById('message').innerText = "Congratulations! You've reached the exit!";
+                document.getElementById('message').innerText = "You have reached the end, press the generate maze button to generate onother maze.";
             } else {
                 document.getElementById('message').innerText = '';
             }
         }
+    }
+}
+
+function toggleView() {
+    var viewCheck = document.getElementById("seeAll")
+    var body = document.getElementById("body")
+    if (viewCheck.checked) {
+        body.style.display = "block";
+    } else {
+        body.style.display = "flex";
     }
 }
 
@@ -191,10 +177,6 @@ document.getElementById('generateButton').addEventListener('click', () => {
     }
 
     mazeLayout = Array.from({ length: mazeHeight }, () => Array(mazeWidth).fill('#'));
-    if (document.getElementById("BetterGenBeta").checked) {
-        generateMazeBeta(0,0);
-    } else {
-        generateMaze(0,0)
-    }
+    generateMaze(0,0)
     drawMaze();
 });
