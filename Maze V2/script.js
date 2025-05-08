@@ -3,15 +3,15 @@ let mazeHeight;
 let cellSize = 10;
 const minCellSize = 2;
 const maxMazeSize = 100001;
+let hekersettings = { phase: 0 }
 let mazeLayout = [];
 let playerPos = { x: 0, y: 0 };
 let exitPos = { x: 0, y: 0 };
 let generated = 0;
 let totalgenerate = 0;
-let settings = { phase: 0, ViewGenErr: 0 };
 let rcell = { a: 0, b: 0, c: 0, d: 0 }
 let timer = { on: 0, time: 0 }
-let generrorcount = { now: 0, all: 0 }
+let lastCellColor = 'white';
 
 function toggleMenu() {
       var menu = document.getElementById("slidingMenu");
@@ -37,19 +37,53 @@ function generateMaze(x, y) {
             if (nx >= 0 && nx < mazeHeight && ny >= 0 && ny < mazeWidth && mazeLayout[nx][ny] === '#') {
                 mazeLayout[x + dx][y + dy] = ' ';
                 generateMaze(nx, ny);
-                }
             }
         }
-        catch(e) {
-            console.log("The program is having a minor extitencial crisist")
-            generrorcount.now += 1
-            generrorcount.all += 1
-            console.log("Errors this generation: " + generrorcount.now)
-            console.log("Errors all generations: " + generrorcount.all)
-            if (settings.ViewGenErr == 1) {
-                console.log(e)
+    } catch(e) {
+        console.log(e)
+    }
+}
+
+function generateMazeBeta(startX, startY) {
+    const directions = [
+        { dx: 0, dy: -1 },
+        { dx: -1, dy: 0 },
+        { dx: 0, dy: 1 },
+        { dx: 1, dy: 0 }
+    ];
+
+    const stack = [];
+    stack.push({ x: startX, y: startY });
+    mazeLayout[startX][startY] = ' ';
+
+    while (stack.length > 0) {
+        const current = stack[stack.length - 1];
+
+        // Shuffle directions for randomness
+        const shuffled = directions.sort(() => Math.random() - 0.5);
+        let carved = false;
+
+        for (const { dx, dy } of shuffled) {
+            const nx = current.x + dx * 2;
+            const ny = current.y + dy * 2;
+
+            if (
+                nx >= 0 && nx < mazeHeight &&
+                ny >= 0 && ny < mazeWidth &&
+                mazeLayout[nx][ny] === '#'
+            ) {
+                mazeLayout[current.x + dx][current.y + dy] = ' ';
+                mazeLayout[nx][ny] = ' ';
+                stack.push({ x: nx, y: ny });
+                carved = true;
+                break;
             }
         }
+
+        if (!carved) {
+            stack.pop(); // backtrack
+        }
+    }
 }
 
 function drawMaze() {
@@ -80,30 +114,31 @@ function drawMaze() {
 function updatePlayer(dx = 0, dy = 0, x = "NaN", y = "NaN") {
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
-    console.log("Player moved to: " + x + ", " + y)
 
-    // Clear the previous player position
-    ctx.fillStyle = 'white'; // Or whatever your path color is
+    // Restore the color of the cell the player just left
+    ctx.fillStyle = lastCellColor;
     ctx.fillRect((playerPos.y - dy) * cellSize, (playerPos.x - dx) * cellSize, cellSize, cellSize);
 
-    // Draw the new player position
+    // Determine the new underlying color
+    if (playerPos.x === 0 && playerPos.y === 0) {
+        lastCellColor = 'green'; // Start
+    } else if (playerPos.x === exitPos.x && playerPos.y === exitPos.y) {
+        lastCellColor = 'red'; // Exit
+    } else if (mazeLayout[playerPos.x][playerPos.y] === '#') {
+        lastCellColor = 'black'
+    } else {
+        lastCellColor = 'white';
+    }
+
+    // Draw the player
     ctx.fillStyle = 'blue';
     ctx.fillRect(playerPos.y * cellSize, playerPos.x * cellSize, cellSize, cellSize);
 }
 
-function movePlayer(dx, dy, phase = 0) {
+function movePlayer(dx, dy) {
     const newX = playerPos.x + dx;
     const newY = playerPos.y + dy;
-    if (phase === 1) {
-        playerPos.x = newX;
-        playerPos.y = newY;
-        updatePlayer(dx, dy, newX, newY); // Update the player's position
-        if (playerPos.x === exitPos.x && playerPos.y === exitPos.y) {
-            document.getElementById('message').innerText = "Congratulations! You've reached the exit!";
-        } else {
-            document.getElementById('message').innerText = '';
-        }
-    } else if (settings.phase === 1) {
+    if (hekersettings.phase === 1) {
         playerPos.x = newX;
         playerPos.y = newY;
         updatePlayer(dx, dy, newX, newY); // Update the player's position
@@ -113,7 +148,7 @@ function movePlayer(dx, dy, phase = 0) {
             document.getElementById('message').innerText = '';
         }
     } else {
-        if (mazeLayout[newX] && mazeLayout[newX][newY] !== '#') {
+        if (mazeLayout[newX][newY] && mazeLayout[newX][newY] !== '#') {
             playerPos.x = newX;
             playerPos.y = newY;
             updatePlayer(dx, dy, newX, newY); // Update the player's position
@@ -128,10 +163,10 @@ function movePlayer(dx, dy, phase = 0) {
 
 document.addEventListener('keydown', (e) => {
     switch (e.key) {
-        case 'w': movePlayer(-1, 0, 0); break;
-        case 's': movePlayer(1, 0, 0); break;
-        case 'a': movePlayer(0, -1, 0); break;
-        case 'd': movePlayer(0, 1, 0); break;
+        case 'w': movePlayer(-1, 0); break;
+        case 's': movePlayer(1, 0); break;
+        case 'a': movePlayer(0, -1); break;
+        case 'd': movePlayer(0, 1); break;
     }
 });
 
@@ -156,45 +191,10 @@ document.getElementById('generateButton').addEventListener('click', () => {
     }
 
     mazeLayout = Array.from({ length: mazeHeight }, () => Array(mazeWidth).fill('#'));
-    console.log("generating maze")
-    generation = 0
-    generateMaze(0, 0);
-    console.log("Generation is done with " + generrorcount.now + " errors")
-    generrorcount.now = 0
-    console.log("drawing maze")
+    if (document.getElementById("BetterGenBeta").checked) {
+        generateMazeBeta(0,0);
+    } else {
+        generateMaze(0,0)
+    }
     drawMaze();
-    console.log("maze is complete")
 });
-const player = {
-    setpos(x, y, phase = 0) {
-        console.log("moving player to: " + x + ", " + y)
-        dx = x - playerPos.x
-        dy = y - playerPos.y
-        movePlayer(dx, dy, phase)
-    },
-    finish() {
-        console.log("moving player to finish")
-        player.setpos(exitPos.x, exitPos.y)
-    }
-}
-const cell = {
-    set(x, y, set) {
-        console.log("Setting the cell")
-    }
-}
-const maze = {
-    generate(x, y) {
-        mazeLayout = Array.from({ length: x }, () => Array(y).fill('#'));
-        console.log("generating maze")
-        generation = 0
-        generateMaze(0, 0);
-        console.log("Generation is done with " + generrorcount.now + " errors")
-        generrorcount.now = 0
-        console.log("drawing maze")
-        drawMaze();
-        console.log("maze is complete")
-    },
-    setfinish(x, y) {
-        exitPos = { x: x, y: y }
-    }
-}
