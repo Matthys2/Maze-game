@@ -2,7 +2,6 @@ let mazeWidth;
 let mazeHeight;
 let cellSize = 10;
 const minCellSize = 2;
-const maxMazeSize = 100001;
 let hekersettings = { phase: 0 }
 let mazeLayout = [];
 let playerPos = { x: 0, y: 0 };
@@ -60,7 +59,7 @@ function generateMaze(startX, startY) {
     }
 }
 
-function drawMaze() {
+function drawMaze(save=0) {
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
     canvas.width = mazeWidth * cellSize;
@@ -76,8 +75,10 @@ function drawMaze() {
             } else if (row === mazeHeight - 1 && col === mazeWidth - 1) {
                 ctx.fillStyle = 'red';
                 exitPos = { x: row, y: col };
+            } else if (mazeLayout[row][col] === '-' && save === 1) {
+                ctx.fillStyle = 'grey';
             } else {
-                ctx.fillStyle = 'white';
+                ctx.fillStyle = 'white'
             }
             ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
         }
@@ -103,6 +104,7 @@ function updatePlayer(dx = 0, dy = 0) {
     } else {
         if (document.getElementById("ShowPath").checked) {
             lastCellColor = 'grey'
+            mazeLayout[playerPos.x][playerPos.y] = '-'
         } else {lastCellColor = 'white'}
     }
 
@@ -147,9 +149,10 @@ function toggleView() {
     }
 }
 
-document.getElementById('downloadFile').addEventListener('click', function() {
+function downloadMaze() {
     // Create a Blob with the content you want to download
-    const content = JSON.stringify(mazeLayout, null, 2);
+    const data = { maze: mazeLayout, width: mazeWidth, height: mazeHeight, x: 0, y: 0 }
+    const content = JSON.stringify(data, null, 2);
     const blob = new Blob([content], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     // Create a temporary link element
@@ -164,7 +167,27 @@ document.getElementById('downloadFile').addEventListener('click', function() {
 
     // Release the Blob URL
     URL.revokeObjectURL(url);
-});
+};
+
+function downloadProgress() {
+    // Create a Blob with the content you want to download
+    const data = { maze: mazeLayout, width: mazeWidth, height: mazeHeight, x: playerPos.x, y: playerPos.y }
+    const content = JSON.stringify(data, null, 2);
+    const blob = new Blob([content], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    // Create a temporary link element
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'maze'; // Specify the file name
+
+    // Append to the body, click and remove
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // Release the Blob URL
+    URL.revokeObjectURL(url);
+};
 
 document.addEventListener('keydown', (e) => {
     switch (e.key) {
@@ -177,12 +200,18 @@ document.addEventListener('keydown', (e) => {
 
 document.getElementById('zoom-in').addEventListener('click', () => {
     cellSize += 2;
-    drawMaze();
+    x = playerPos.x
+    y = playerPos.y
+    drawMaze(1);
+    movePlayer(x,y)
 });
 
 document.getElementById('zoom-out').addEventListener('click', () => {
     cellSize = Math.max(minCellSize, cellSize - 1);
-    drawMaze();
+    x = playerPos.x
+    y = playerPos.y
+    drawMaze(1);
+    movePlayer(x,y)
 });
 
 document.getElementById('generateButton').addEventListener('click', () => {
@@ -190,8 +219,8 @@ document.getElementById('generateButton').addEventListener('click', () => {
     mazeHeight = parseInt(document.getElementById('mazeHeightInput').value);
     totalgenerate = Math.trunc(mazeWidth * mazeHeight / 4);
 
-    if (isNaN(mazeWidth) || isNaN(mazeHeight) || mazeWidth % 2 === 0 || mazeHeight % 2 === 0 || mazeWidth > maxMazeSize || mazeHeight > maxMazeSize) {
-        alert(`Please enter odd numbers less than or equal to ${maxMazeSize}.`);
+    if (isNaN(mazeWidth) || isNaN(mazeHeight) || mazeWidth % 2 === 0 || mazeHeight % 2 === 0) {
+        alert(`Please enter odd numbers`);
         return;
     }
 
@@ -238,25 +267,34 @@ function handleDrop(e) {
 }
 
 function handleFiles(files) {
-    const file = files[0];
-    if (file && file.type === "application/json") {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            try {
-            const data = JSON.parse(event.target.result);
-            if (Array.isArray(data)) {
-                mazeLayout = data;
-                drawMaze()
-            } else {
-                alert("The JSON file does not contain an array.");
-            }
-            } catch (error) {
-                alert("Invalid JSON file.");
-                console.error(error);
-            }
-        };
-        reader.readAsText(file);
+  const file = files[0];
+  if (file && file.type === "application/json") {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      try {
+        const data = JSON.parse(event.target.result);
+
+        if (Array.isArray(data)) {
+          // legacy support: plain array
+          array = data;
+        } else if (Array.isArray(data.maze)) {
+            // object with array and variables
+            mazeLayout = data.maze
+            mazeWidth = data.width
+            mazeHeight = data.height
+            drawMaze(1)
+            movePlayer(data.x,data.y)
         } else {
-        alert("Please upload a valid .json file.");
-    }
+          alert("Invalid JSON file.");
+          return;
+        }
+      } catch (error) {
+        alert("Invalid JSON file.");
+        console.error(error);
+      }
+    };
+    reader.readAsText(file);
+  } else {
+    alert("Please upload a valid .json file.");
+  }
 }

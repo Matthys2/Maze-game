@@ -23,7 +23,10 @@
       </div>
       <div class="menu-subtitle">Saving & sharing</div>
       <div class="menu-item">
-        <button id="downloadFile">Download maze</button>
+        <button onclick="downloadMaze()">Download maze</button>
+      </div>
+      <div class="menu-item">
+        <button onclick="downloadProgress()">Save progress</button>
       </div>
       <div id="drop-area">
   <h3>Drag & Drop Files Here</h3>
@@ -34,8 +37,8 @@
     </div>
   </div>
     <div id="sizeInputs">
-        <input type="number" id="mazeWidthInput" placeholder="Width (odd, max 100001)">
-        <input type="number" id="mazeHeightInput" placeholder="Height (odd, max 100001)">
+        <input type="number" id="mazeWidthInput" placeholder="Width (odd)">
+        <input type="number" id="mazeHeightInput" placeholder="Height (odd)">
         <button id="generateButton">Generate Maze</button>
     </div>
     <canvas id="mazeCanvas"></canvas>
