@@ -147,6 +147,25 @@ function toggleView() {
     }
 }
 
+document.getElementById('downloadFile').addEventListener('click', function() {
+    // Create a Blob with the content you want to download
+    const content = JSON.stringify(mazeLayout, null, 2);
+    const blob = new Blob([content], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    // Create a temporary link element
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'maze'; // Specify the file name
+
+    // Append to the body, click and remove
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // Release the Blob URL
+    URL.revokeObjectURL(url);
+});
+
 document.addEventListener('keydown', (e) => {
     switch (e.key) {
         case 'w': movePlayer(-1, 0); break;
@@ -180,3 +199,64 @@ document.getElementById('generateButton').addEventListener('click', () => {
     generateMaze(0,0)
     drawMaze();
 });
+
+const dropArea = document.getElementById("drop-area");
+const fileInput = document.getElementById("fileElem");
+const fileSelect = document.getElementById("fileSelect");
+
+fileSelect.addEventListener("click", () => fileInput.click());
+
+fileInput.addEventListener("change", () => {
+  if (fileInput.files.length > 0) {
+    handleFiles(fileInput.files);
+  }
+});
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+  dropArea.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+  dropArea.classList.add('highlight');
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+  dropArea.classList.remove('highlight');
+});
+
+dropArea.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+  const dt = e.dataTransfer;
+  const files = dt.files;
+  handleFiles(files);
+}
+
+function handleFiles(files) {
+    const file = files[0];
+    if (file && file.type === "application/json") {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+            const data = JSON.parse(event.target.result);
+            if (Array.isArray(data)) {
+                mazeLayout = data;
+                drawMaze()
+            } else {
+                alert("The JSON file does not contain an array.");
+            }
+            } catch (error) {
+                alert("Invalid JSON file.");
+                console.error(error);
+            }
+        };
+        reader.readAsText(file);
+        } else {
+        alert("Please upload a valid .json file.");
+    }
+}

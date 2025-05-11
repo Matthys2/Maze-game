@@ -21,8 +21,18 @@
           <input id="seeAll" type="checkbox" onclick="toggleView()"> See all cells (for big mazes)
         </label>
       </div>
-  </div>
+      <div class="menu-subtitle">Saving & sharing</div>
+      <div class="menu-item">
+        <button id="downloadFile">Download maze</button>
+      </div>
+      <div id="drop-area">
+  <h3>Drag & Drop Files Here</h3>
+  <p>or click to upload</p>
+  <input type="file" id="fileElem" accept=".json" style="display:none">
+  <button id="fileSelect">Browse Files</button>
 </div>
+    </div>
+  </div>
     <div id="sizeInputs">
         <input type="number" id="mazeWidthInput" placeholder="Width (odd, max 100001)">
         <input type="number" id="mazeHeightInput" placeholder="Height (odd, max 100001)">

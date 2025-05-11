@@ -113,4 +113,26 @@ button:hover {
 .menu-subtitle {
     font-size: 1.3em;
     font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+#drop-area {
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  width: 240px;
+  padding: 30px;
+  text-align: center;
+  font-family: sans-serif;
+  transition: border-color 0.3s;
+}
+
+#fileSelect {
+  display: inline-block;
+  margin-top: 10px;
+  background: #007bff;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
 }
