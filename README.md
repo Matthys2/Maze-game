@@ -4,6 +4,9 @@ I have created a randomly generating maze game, you can do these things (in the 
 
 - Create endless random mazes up to any size your pc can handle
 - zoom in and out
+- Download a maze
+- Save progress in your maze
+- View where you have been
 
 # Updates
 
@@ -11,6 +14,4 @@ I will still be updating his game with updates. Only the V2 version will be upda
 
 Things I want to add to the game are:
 
-- Better generating code: generate even bigger mazes
-- More options
-- Download maze button
+- Create custom mazes
