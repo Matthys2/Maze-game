@@ -2,14 +2,12 @@ let mazeWidth;
 let mazeHeight;
 let cellSize = 10;
 const minCellSize = 2;
-let hekersettings = { phase: 0 }
+let hekersettings = { heker: 0, phase: 0 }
 let mazeLayout = [];
 let playerPos = { x: 0, y: 0 };
 let exitPos = { x: 0, y: 0 };
 let generated = 0;
 let totalgenerate = 0;
-let rcell = { a: 0, b: 0, c: 0, d: 0 }
-let timer = { on: 0, time: 0 }
 let lastCellColor = 'white';
 
 function toggleMenu() {
@@ -59,7 +57,7 @@ function generateMaze(startX, startY) {
     }
 }
 
-function drawMaze(save=0) {
+function drawMaze() {
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
     canvas.width = mazeWidth * cellSize;
@@ -75,7 +73,7 @@ function drawMaze(save=0) {
             } else if (row === mazeHeight - 1 && col === mazeWidth - 1) {
                 ctx.fillStyle = 'red';
                 exitPos = { x: row, y: col };
-            } else if (mazeLayout[row][col] === '-' && save === 1) {
+            } else if (mazeLayout[row][col] === '-') {
                 ctx.fillStyle = 'grey';
             } else {
                 ctx.fillStyle = 'white'
@@ -129,7 +127,7 @@ function movePlayer(dx, dy) {
         if (mazeLayout[newX][newY] && mazeLayout[newX][newY] !== '#') {
             playerPos.x = newX;
             playerPos.y = newY;
-            updatePlayer(dx, dy, newX, newY); // Update the player's position
+            updatePlayer(dx, dy); // Update the player's position
             if (playerPos.x === exitPos.x && playerPos.y === exitPos.y) {
                 document.getElementById('message').innerText = "You have reached the end, press the generate maze button to generate onother maze.";
             } else {
@@ -149,9 +147,43 @@ function toggleView() {
     }
 }
 
+function toggleHeker(value=0) {
+    var heker = document.getElementById("heker")
+    hekersettings.heker = value
+    if (value === 1) {
+        heker.style.display = "block";
+    } else {
+        hekersettings.heker = 0
+        heker.style.display = "none";
+    }
+}
+
+function tp() {
+    let tpX = parseInt(document.getElementById("tpX").value)
+    let tpY = parseInt(document.getElementById("tpY").value)
+    let diffX = tpX - playerPos.x
+    let diffY = tpY - playerPos.y
+    if (hekersettings.phase === 0) {
+        hekersettings.phase = 1
+        movePlayer(diffX,diffY)
+        hekersettings.phase = 0
+    } else {
+        movePlayer(diffX,diffY)
+    }
+}
+
+function togglePhase() {
+    var phaseCheck = document.getElementById("phaseCheck")
+    if (phaseCheck.checked) {
+        hekersettings.phase = 1
+    } else {
+        hekersettings.phase = 0
+    }
+}
+
 function downloadMaze() {
     // Create a Blob with the content you want to download
-    const data = { maze: mazeLayout, width: mazeWidth, height: mazeHeight, x: 0, y: 0 }
+    const data = { type: "maze", maze: mazeLayout, width: mazeWidth, height: mazeHeight, x: 0, y: 0 }
     const content = JSON.stringify(data, null, 2);
     const blob = new Blob([content], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -171,14 +203,14 @@ function downloadMaze() {
 
 function downloadProgress() {
     // Create a Blob with the content you want to download
-    const data = { maze: mazeLayout, width: mazeWidth, height: mazeHeight, x: playerPos.x, y: playerPos.y }
+    const data = { type:"save", maze: mazeLayout, width: mazeWidth, height: mazeHeight, x: playerPos.x, y: playerPos.y }
     const content = JSON.stringify(data, null, 2);
     const blob = new Blob([content], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     // Create a temporary link element
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'maze'; // Specify the file name
+    a.download = 'maze-save'; // Specify the file name
 
     // Append to the body, click and remove
     document.body.appendChild(a);
@@ -276,14 +308,31 @@ function handleFiles(files) {
 
         if (Array.isArray(data)) {
           // legacy support: plain array
-          array = data;
-        } else if (Array.isArray(data.maze)) {
+          mazeLayout = data;
+          drawMaze()
+        } else if (data.type === undefined) {
+            mazeLayout = data.maze
+            mazeWidth = data.width
+            mazeHeight = data.height
+            drawMaze(1)
+            movePlayer(data.x, data.y)
+        } else if (data.type === "heker") {
+            if (data.pass === "IAmHeker") {
+                if (!data.toggle === "unset")
+                toggleHeker(data.toggle)
+            }
+        } else if (data.type === "save") {
             // object with array and variables
             mazeLayout = data.maze
             mazeWidth = data.width
             mazeHeight = data.height
             drawMaze(1)
-            movePlayer(data.x,data.y)
+            movePlayer(data.x, data.y)
+        } else if (data.type === "maze") {
+            mazeLayout = data.maze
+            mazeWidth = data.width
+            mazeHeight = data.height
+            drawMaze()
         } else {
           alert("Invalid JSON file.");
           return;

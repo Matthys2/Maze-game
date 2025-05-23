@@ -7,7 +7,7 @@
 </head>
 <body id="body">
   <div>
-    <button class="open-menu-button" onclick="toggleMenu()">Settings</button>
+    <button class="open-menu-button" onclick="toggleMenu()">Options</button>
     <div id="slidingMenu" class="sliding-menu-container">
       <button class="close-button" onclick="toggleMenu()">&times;</button>
       <div class="menu-title">Options</div>
@@ -20,6 +20,21 @@
         <label>
           <input id="seeAll" type="checkbox" onclick="toggleView()"> See all cells (for big mazes)
         </label>
+      </div>
+      <div id="heker">
+        <div class="menu-subtitle">
+          HEKERSETTINGS
+        </div>
+        <div class="menu-item">
+          <label>
+            <input id="phaseCheck" type="checkbox" onclick="togglePhase()"> Phase though walls
+          </label>
+        </div>
+        <div class="menu-item">
+          <input type="number" id="tpX" placeholder="X">
+          <input type="number" id="tpY" placeholder="Y">
+          <button id="tpBtn" onclick="tp()">Teleport</button>
+        </div>
       </div>
       <div class="menu-subtitle">Saving & sharing</div>
       <div class="menu-item">

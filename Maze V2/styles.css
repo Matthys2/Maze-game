@@ -69,6 +69,8 @@ button:hover {
     height: 100vh; /* Full viewport height */
     padding: 20px;
     text-align: left; /* Align text to the left in the menu */
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .sliding-menu-container.show {
@@ -118,21 +120,27 @@ button:hover {
 }
 
 #drop-area {
-  border: 2px dashed #ccc;
-  border-radius: 10px;
-  width: 240px;
-  padding: 30px;
-  text-align: center;
-  font-family: sans-serif;
-  transition: border-color 0.3s;
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    width: 240px;
+    padding: 30px;
+    text-align: center;
+    font-family: sans-serif;
+    transition: border-color 0.3s;
+    margin-bottom: 35px;
+
 }
 
 #fileSelect {
-  display: inline-block;
-  margin-top: 10px;
-  background: #007bff;
-  color: white;
-  padding: 8px 15px;
-  border-radius: 5px;
-  cursor: pointer;
+    display: inline-block;
+    margin-top: 10px;
+    background: #007bff;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#heker {
+    display: none;
 }
