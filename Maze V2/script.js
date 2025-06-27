@@ -2,12 +2,9 @@ let mazeWidth;
 let mazeHeight;
 let cellSize = 10;
 const minCellSize = 2;
-let hekersettings = { heker: 0, phase: 0 }
 let mazeLayout = [];
 let playerPos = { x: 0, y: 0 };
 let exitPos = { x: 0, y: 0 };
-let generated = 0;
-let totalgenerate = 0;
 let lastCellColor = 'white';
 
 function toggleMenu() {
@@ -15,17 +12,21 @@ function toggleMenu() {
       menu.classList.toggle("show");
     }
 
-function generateMaze(startX, startY) {
+function generateMaze(easygen) {
     const directions = [
         { dx: 0, dy: -1 },
         { dx: -1, dy: 0 },
         { dx: 0, dy: 1 },
         { dx: 1, dy: 0 }
     ];
-
     const stack = [];
-    stack.push({ x: startX, y: startY });
-    mazeLayout[startX][startY] = ' ';
+    if (easygen) {
+        stack.push({ x: 0, y: 0 });
+        mazeLayout[0][0] = ' ';
+    } else {
+        stack.push({ x: mazeHeight-1, y: mazeWidth-1 });
+        mazeLayout[mazeHeight-1][mazeWidth-1] = ' ';
+    }
 
     while (stack.length > 0) {
         const current = stack[stack.length - 1];
@@ -62,13 +63,12 @@ function drawMaze() {
     const ctx = canvas.getContext('2d');
     canvas.width = mazeWidth * cellSize;
     canvas.height = mazeHeight * cellSize;
-
     for (let row = 0; row < mazeLayout.length; row++) {
         for (let col = 0; col < mazeLayout[row].length; col++) {
             if (mazeLayout[row][col] === '#') {
                 ctx.fillStyle = 'black';
             } else if (row === 0 && col === 0) {
-                ctx.fillStyle = 'green';
+                ctx.fillStyle = 'blue';
                 playerPos = { x: row, y: col };
             } else if (row === mazeHeight - 1 && col === mazeWidth - 1) {
                 ctx.fillStyle = 'red';
@@ -94,7 +94,7 @@ function updatePlayer(dx = 0, dy = 0) {
 
     // Determine the new underlying color
     if (playerPos.x === 0 && playerPos.y === 0) {
-        lastCellColor = 'green'; // Start
+        lastCellColor = 'blue'; // Start
     } else if (playerPos.x === exitPos.x && playerPos.y === exitPos.y) {
         lastCellColor = 'red'; // Exit
     } else if (mazeLayout[playerPos.x][playerPos.y] === '#') {
@@ -107,32 +107,21 @@ function updatePlayer(dx = 0, dy = 0) {
     }
 
     // Draw the player
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = 'green';
     ctx.fillRect(playerPos.y * cellSize, playerPos.x * cellSize, cellSize, cellSize);
 }
 
 function movePlayer(dx, dy) {
     const newX = playerPos.x + dx;
     const newY = playerPos.y + dy;
-    if (hekersettings.phase === 1) {
+    if (newX >= 0 && newY >= 0 && newX <= mazeWidth-1 && newY <= mazeHeight-1 && mazeLayout[newX][newY] !== '#') {    
         playerPos.x = newX;
         playerPos.y = newY;
-        updatePlayer(dx, dy, newX, newY); // Update the player's position
+        updatePlayer(dx, dy); // Update the player's position
         if (playerPos.x === exitPos.x && playerPos.y === exitPos.y) {
-            document.getElementById('message').innerText = "Congratulations! You've reached the exit!";
+            document.getElementById('message').innerText = "You have reached the end, press the generate maze button to generate onother maze.";
         } else {
             document.getElementById('message').innerText = '';
-        }
-    } else {
-        if (mazeLayout[newX][newY] && mazeLayout[newX][newY] !== '#') {
-            playerPos.x = newX;
-            playerPos.y = newY;
-            updatePlayer(dx, dy); // Update the player's position
-            if (playerPos.x === exitPos.x && playerPos.y === exitPos.y) {
-                document.getElementById('message').innerText = "You have reached the end, press the generate maze button to generate onother maze.";
-            } else {
-                document.getElementById('message').innerText = '';
-            }
         }
     }
 }
@@ -144,40 +133,6 @@ function toggleView() {
         body.style.display = "block";
     } else {
         body.style.display = "flex";
-    }
-}
-
-function toggleHeker(value=0) {
-    var heker = document.getElementById("heker")
-    hekersettings.heker = value
-    if (value === 1) {
-        heker.style.display = "block";
-    } else {
-        hekersettings.heker = 0
-        heker.style.display = "none";
-    }
-}
-
-function tp() {
-    let tpX = parseInt(document.getElementById("tpX").value)
-    let tpY = parseInt(document.getElementById("tpY").value)
-    let diffX = tpX - playerPos.x
-    let diffY = tpY - playerPos.y
-    if (hekersettings.phase === 0) {
-        hekersettings.phase = 1
-        movePlayer(diffX,diffY)
-        hekersettings.phase = 0
-    } else {
-        movePlayer(diffX,diffY)
-    }
-}
-
-function togglePhase() {
-    var phaseCheck = document.getElementById("phaseCheck")
-    if (phaseCheck.checked) {
-        hekersettings.phase = 1
-    } else {
-        hekersettings.phase = 0
     }
 }
 
@@ -255,10 +210,12 @@ document.getElementById('generateButton').addEventListener('click', () => {
         alert(`Please enter odd numbers`);
         return;
     }
+    document.getElementById("message").innerText = "Generating maze"
 
     mazeLayout = Array.from({ length: mazeHeight }, () => Array(mazeWidth).fill('#'));
-    generateMaze(0,0)
+    generateMaze(document.getElementById("easygen").checked)
     drawMaze();
+    document.getElementById("message").innerText = "Maze complete"
 });
 
 const dropArea = document.getElementById("drop-area");
@@ -316,11 +273,6 @@ function handleFiles(files) {
             mazeHeight = data.height
             drawMaze(1)
             movePlayer(data.x, data.y)
-        } else if (data.type === "heker") {
-            if (data.pass === "IAmHeker") {
-                if (!data.toggle === "unset")
-                toggleHeker(data.toggle)
-            }
         } else if (data.type === "save") {
             // object with array and variables
             mazeLayout = data.maze

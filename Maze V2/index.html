@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Maze V2</title>
+    <title id="title">Maze V2</title>
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -21,20 +21,10 @@
           <input id="seeAll" type="checkbox" onclick="toggleView()"> See all cells (for big mazes)
         </label>
       </div>
-      <div id="heker">
-        <div class="menu-subtitle">
-          HEKERSETTINGS
-        </div>
-        <div class="menu-item">
-          <label>
-            <input id="phaseCheck" type="checkbox" onclick="togglePhase()"> Phase though walls
-          </label>
-        </div>
-        <div class="menu-item">
-          <input type="number" id="tpX" placeholder="X">
-          <input type="number" id="tpY" placeholder="Y">
-          <button id="tpBtn" onclick="tp()">Teleport</button>
-        </div>
+      <div class="menu-item">
+        <label>
+          <input id="easygen" type="checkbox"> Simpler generation (old generation)
+        </label>
       </div>
       <div class="menu-subtitle">Saving & sharing</div>
       <div class="menu-item">
