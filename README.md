@@ -23,3 +23,5 @@ Things i want to add soon are:
 - Customisation
 - Saving on device (saves settings, mazes, etc.) (NEXT UPDATE)
 - Dark mode
+- speedrun timer
+- mobile buttons
